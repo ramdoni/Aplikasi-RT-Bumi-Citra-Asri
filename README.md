@@ -1,7 +1,7 @@
 # Aplikasi RT Bumi Citra Asri
 Aplikasi RT 01  RW 12 - Perumahan Bumi Citra Asri
 
-Aplikasi ini dibuat untuk memudahkan Pengurus RT baik itu bendahara sekretaris dan pengurus lainnya untuk data warga, seperti:
+Aplikasi ini dibuat untuk memudahkan Pengurus RT baik itu bendahara sekretaris dan pengurus lainnya untuk mengelola lingkungan sekitar, fitur yang ada di aplikasi yaitu:
 
 1. Data Pribadi / Data Keluarga
 2. Data Tempat Tinggal
