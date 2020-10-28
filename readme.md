@@ -12,6 +12,7 @@ Aplikasi ini dibuat untuk memudahkan Pengurus RT baik itu bendahara sekretaris d
 
 # Teknologi
 
+- PHP https://www.php.net/
 - Framework Laravel https://laravel.com/
 - Inertia https://inertiajs.com/
 - MySQL https://www.mysql.com/
