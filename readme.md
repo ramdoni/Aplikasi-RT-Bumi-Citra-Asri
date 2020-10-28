@@ -8,3 +8,10 @@ Aplikasi ini dibuat untuk memudahkan Pengurus RT baik itu bendahara sekretaris d
 3. Pembuatan Surat Izin Tinggal (Comingsoon)
 4. Pembuatan Surat Pengantar Nikah (Comingsoon)
 5. Pembuatan Surat Izin Usaha (Comingsoon)
+
+
+# Teknologi
+
+- Framework Laravel https://laravel.com/
+- Inertia https://inertiajs.com/
+- MySQL https://www.mysql.com/
