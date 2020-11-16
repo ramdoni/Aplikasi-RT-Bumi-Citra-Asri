@@ -36,6 +36,8 @@ Route::get('/img/{path}', 'ImagesController@show')->where('path', '.*');
 // Iuran
 Route::get('iuran')->name('iuran')->uses('IuranController@index')->middleware('remember', 'auth');
 Route::post('iuran/bayar','IuranController@bayar')->name('iuran.bayar')->middleware('remember', 'auth');
+Route::post('iuran/store-form-iuran','IuranController@storeFormIuran')->name('iuran.store-form-iuran')->middleware('remember', 'auth');
+Route::get('iuran/download-excel','IuranController@downloadExcel')->name('iuran.download-excel')->middleware('remember', 'auth');
 
 // Warga
 Route::get('warga')->name('warga')->uses('WargaController@index')->middleware('remember', 'auth');

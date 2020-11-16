@@ -53,8 +53,6 @@ class WaController extends Controller
                 $nominal = floor($nominal / $minimal_iuran);
                 
                 for($m=$last_month;$m<($nominal+$last_month);$m++){
-
-
                     $iuran = new Iuran();
                     $iuran->warga_id = $warga->id;
                     $iuran->bulan = $m;
@@ -73,6 +71,7 @@ class WaController extends Controller
                     $msg .= "\n\n_Noted : E-Kwitansi ini adalah bukti transaksi yang sah sebgai alternatif kwitansi secara fisik_";
 
                     wa(['p'=>$warga->no_telepon,'m'=>$msg]);
+                    wa(['p'=>'081284884586','m'=>$msg]);
                 }
 
                 return 'Iuran berhasil dibayarkan';

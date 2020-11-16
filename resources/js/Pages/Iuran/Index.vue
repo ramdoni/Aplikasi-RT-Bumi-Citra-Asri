@@ -1,7 +1,10 @@
 <template>
   <div>
     <h1 class="mb-8 font-bold text-3xl">Iuran</h1>
-    <div class="mb-6 flex justify-between items-center">
+    <div class="mb-6 justify-between items-center">
+      <input type="text" class="px-4 py-3" v-model="form.search" placeholder="Search" />
+      <a :href="route('iuran.download-excel')+'?search='+(form.search?form.search:'')" class="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-5 rounded">Download Excel</a>
+      <button v-on:click="modal=true" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded">Tambah Iuran</button>
     </div>
     <div class="bg-white rounded shadow overflow-x-auto">
       <table class="w-full whitespace-no-wrap">
@@ -80,10 +83,64 @@
       </table>
     </div>
     <pagination :links="iurans.links" />
+
+
+    <div class="fixed z-10 inset-0 overflow-y-auto" v-if="modal==true">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" v-on:click="modal=false">
+          <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen"></span>&#8203;
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full" role="dialog" aria-modal="true" aria-labelledby="modal-headline">
+        <form  @submit.prevent="submitFormBayar">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-2 sm:pb-4">
+              <div class="sm:items-start">
+                <div class="mt-6 text-center sm:mt-4 sm:ml-4 sm:mr-4 sm:text-left">
+                  <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-headline"> Tambah Iuran</h3>
+                  <div class="mt-4 flex">
+                    <select class="px-4 py-3 bg-white shadow-sm border w-1/2" v-model="formTambah.warga_id" required>
+                      <option value=""> --- Pilih Warga --- </option>
+                      <option v-for="warga in wargas" :value="warga.id">{{warga.nama}}</option>
+                    </select>
+                    <select class="px-4 py-3 bg-white shadow-sm border w-1/2" v-model="formTambah.bulan" required>
+                      <option value=""> --- Bulan --- </option>
+                      <option value="1">Januari</option>
+                      <option value="2">Februari</option>
+                      <option value="3">Maret</option>
+                      <option value="4">April</option>
+                      <option value="5">Mei</option>
+                      <option value="6">Juni</option>
+                      <option value="7">Juli</option>
+                      <option value="8">Agustus</option>
+                      <option value="9">September</option>
+                      <option value="10">Oktober</option>
+                      <option value="11">November</option>
+                      <option value="12">Desember</option>
+                    </select>  
+                  </div>
+                  <input type="date" class="px-4 py-3 bg-white shadow-sm border w-1/2" v-model="formTambah.tanggal" required>
+                </div>
+              </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+              <span class="flex w-full rounded-md shadow-sm sm:ml-3 sm:w-auto">
+                <loading-button :loading="sending" class="btn-indigo" type="submit">Simpan</loading-button>
+              </span>
+              <span class="mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto">
+                <button type="button" v-on:click="modal=false" class="inline-flex justify-center w-full rounded-md border border-gray-300 px-4 py-2 bg-white text-base leading-6 font-medium text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5">
+                  Cancel
+                </button>
+              </span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+import LoadingButton from '@/Shared/LoadingButton'
 import Icon from '@/Shared/Icon'
 import Layout from '@/Shared/Layout'
 import mapValues from 'lodash/mapValues'
@@ -107,31 +164,47 @@ export default {
     Icon,
     Pagination,
     SearchFilter,
+    LoadingButton
   },
   props: {
     iurans: Object,
     filters: Object,
+    wargas:Object
   },
   data() {
     return {
+      sending: false,
       form: {
         search: this.filters.search,
         trashed: this.filters.trashed,
-      },
+      }, 
+      modal:false,
+      formTambah:{
+        warga_id:"",
+        bulan:"",
+        tanggal:""
+      }
     }
   },
   watch: {
     form: {
       handler: throttle(function() {
         let query = pickBy(this.form)
-        this.$inertia.replace(this.route('warga', Object.keys(query).length ? query : { remember: 'forget' }))
+        this.$inertia.replace(this.route('iuran', Object.keys(query).length ? query : { remember: 'forget' }))
       }, 150),
       deep: true,
     },
   },
   methods: {
     reset() {
-      this.form = mapValues(this.form, () => null)
+      this.form = mapValues(this.form, () => "")
+    },
+    submitFormBayar(){
+      this.$inertia.post(this.route('iuran.store-form-iuran'), this.formTambah)
+        .then(response => { 
+          this.sending = false
+          this.modal=false
+        })
     },
     bayar(item, bulan,str){
       if(confirm('Bayar iuran bulan '+str +' ?')){
