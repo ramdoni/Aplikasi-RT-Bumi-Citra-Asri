@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
-use App\Warga;
-use App\Iuran;
-use App\User;
+use App\Models\Warga;
+use App\Models\Iuran;
+use App\Models\User;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
@@ -38,42 +38,46 @@ class WaController extends Controller
                 $warga = Warga::where('blok_rumah',$blok[0])->where('nomor',$blok[1])->first();
                 
                 if(!$warga){ return "Data warga dengan blok rumah :".$act[1] .' tidak ditemukan.'; }
-
+                
                 // cek nominal harus kelipatan 50.000
                 if($nominal < $minimal_iuran){ return "Minimal pembayaran iuran 50.000"; }
 
                 // get terakhir bayar
-                $last_month = Iuran::where('tahun',date('Y'))->where('warga_id',$warga->id)->orderBy('bulan','DESC')->first();
-                if($last_month){ 
-                    $last_month = $last_month->bulan+1;
+                $data = Iuran::where('warga_id',$warga->id)->orderBy('id','DESC')->first();
+                $tahun = date('Y');
+                if($data){ 
+                    $last_month = $data->bulan+1;
                 }else{
                     $last_month = 1;
                 }
-
-                $nominal = floor($nominal / $minimal_iuran);
                 
+                $nominal = floor($nominal / $minimal_iuran);
+                $k=1;
                 for($m=$last_month;$m<($nominal+$last_month);$m++){
+                    $bulan = date('m', strtotime("+{$k} months", strtotime("{$data->tahun}-{$data->bulan}-1")));
+                    $tahun = date('Y', strtotime("+{$k} months", strtotime("{$data->tahun}-{$data->bulan}-1")));
+
                     $iuran = new Iuran();
                     $iuran->warga_id = $warga->id;
-                    $iuran->bulan = $m;
-                    $iuran->tahun = date('Y');
+                    $iuran->bulan = $bulan;
+                    $iuran->tahun = $tahun;
                     $iuran->status =1;
                     $iuran->admin_user_id = $user->id;
                     $iuran->save();
 
-                    $monthName = date("F", mktime(0, 0, 0, $m, 10));
+                    $monthName = date("F", mktime(0, 0, 0, $bulan, 10));
                     
                     $kwitansi = "E/".date('dmy')."/".strtoupper($act[1])."/IU/".$iuran->id;
                     Iuran::where('id',$iuran->id)->update(['kwitansi'=>$kwitansi]);
 
-                    $msg  = "E-Kwitansi  : ".$kwitansi."\n\nTelah diterima dari : ".$warga->jenis_kelamin.". ".$warga->nama." Blok ".strtoupper($act[1])." Iuran Kas RT/RW sebesar ".format_idr($minimal_iuran)." untuk bulan ". $monthName .' pada tanggal '.date('d F Y');
+                    $msg  = "E-Kwitansi  : ".$kwitansi."\n\nTelah diterima dari : ".$warga->jenis_kelamin.". ".$warga->nama." Blok ".strtoupper($act[1])." Iuran Kas RT/RW sebesar ".format_idr($minimal_iuran)." untuk bulan ". $monthName .' Tahun '.$tahun.' pada tanggal '.date('d F Y');
                     $msg .="\n\nTerima kasih atas partisipasinya, iuran dari warga akan digunakan untuk kepentingan warga."; 
                     $msg .= "\n\n_Noted : E-Kwitansi ini adalah bukti transaksi yang sah sebgai alternatif kwitansi secara fisik_";
 
                     wa(['p'=>$warga->no_telepon,'m'=>$msg]);
                     wa(['p'=>'081284884586','m'=>$msg]);
+                    $k++;
                 }
-
                 return 'Iuran berhasil dibayarkan';
             }
         }

@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use App\Http\Livewire\Home;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -10,70 +13,19 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::get('/', Home::class)->name('home')->middleware('auth');
+Route::get('login', App\Http\Livewire\Login::class)->name('login');
+Route::post('wa',[\App\Http\Controllers\WaController::class,'index']);
 
-Route::post('wa','WaController@index');
-
-// Auth
-Route::get('login')->name('login')->uses('Auth\LoginController@showLoginForm')->middleware('guest');
-Route::post('login')->name('login.attempt')->uses('Auth\LoginController@login')->middleware('guest');
-Route::post('logout')->name('logout')->uses('Auth\LoginController@logout');
-
-// Dashboard
-Route::get('/')->name('dashboard')->uses('DashboardController')->middleware('auth');
-
-// Users
-Route::get('users')->name('users')->uses('UsersController@index')->middleware('remember', 'auth');
-Route::get('users/create')->name('users.create')->uses('UsersController@create')->middleware('auth');
-Route::post('users')->name('users.store')->uses('UsersController@store')->middleware('auth');
-Route::get('users/{user}/edit')->name('users.edit')->uses('UsersController@edit')->middleware('auth');
-Route::put('users/{user}')->name('users.update')->uses('UsersController@update')->middleware('auth');
-Route::delete('users/{user}')->name('users.destroy')->uses('UsersController@destroy')->middleware('auth');
-Route::put('users/{user}/restore')->name('users.restore')->uses('UsersController@restore')->middleware('auth');
-
-// Images
-Route::get('/img/{path}', 'ImagesController@show')->where('path', '.*');
-
-// Iuran
-Route::get('iuran')->name('iuran')->uses('IuranController@index')->middleware('remember', 'auth');
-Route::post('iuran/bayar','IuranController@bayar')->name('iuran.bayar')->middleware('remember', 'auth');
-Route::post('iuran/store-form-iuran','IuranController@storeFormIuran')->name('iuran.store-form-iuran')->middleware('remember', 'auth');
-Route::get('iuran/download-excel','IuranController@downloadExcel')->name('iuran.download-excel')->middleware('remember', 'auth');
-
-// Warga
-Route::get('warga')->name('warga')->uses('WargaController@index')->middleware('remember', 'auth');
-Route::get('warga/create')->name('warga.create')->uses('WargaController@create')->middleware('auth');
-Route::get('warga/{warga}/edit')->name('warga.edit')->uses('WargaController@edit')->middleware('auth');
-Route::post('warga')->name('warga.store')->uses('WargaController@store')->middleware('auth');
-Route::put('warga/{warga}')->name('warga.update')->uses('WargaController@update')->middleware('auth');
-
-
-// Organizations
-Route::get('organizations')->name('organizations')->uses('OrganizationsController@index')->middleware('remember', 'auth');
-Route::get('organizations/create')->name('organizations.create')->uses('OrganizationsController@create')->middleware('auth');
-Route::post('organizations')->name('organizations.store')->uses('OrganizationsController@store')->middleware('auth');
-Route::get('organizations/{organization}/edit')->name('organizations.edit')->uses('OrganizationsController@edit')->middleware('auth');
-Route::put('organizations/{organization}')->name('organizations.update')->uses('OrganizationsController@update')->middleware('auth');
-Route::delete('organizations/{organization}')->name('organizations.destroy')->uses('OrganizationsController@destroy')->middleware('auth');
-Route::put('organizations/{organization}/restore')->name('organizations.restore')->uses('OrganizationsController@restore')->middleware('auth');
-
-// Contacts
-Route::get('contacts')->name('contacts')->uses('ContactsController@index')->middleware('remember', 'auth');
-Route::get('contacts/create')->name('contacts.create')->uses('ContactsController@create')->middleware('auth');
-Route::post('contacts')->name('contacts.store')->uses('ContactsController@store')->middleware('auth');
-Route::get('contacts/{contact}/edit')->name('contacts.edit')->uses('ContactsController@edit')->middleware('auth');
-Route::put('contacts/{contact}')->name('contacts.update')->uses('ContactsController@update')->middleware('auth');
-Route::delete('contacts/{contact}')->name('contacts.destroy')->uses('ContactsController@destroy')->middleware('auth');
-Route::put('contacts/{contact}/restore')->name('contacts.restore')->uses('ContactsController@restore')->middleware('auth');
-
-// Reports
-Route::get('reports')->name('reports')->uses('ReportsController')->middleware('auth');
-
-// 500 error
-Route::get('500', function () {
-    // Force debug mode for this endpoint in the demo environment
-    if (App::environment('demo')) {
-        Config::set('app.debug', true);
-    }
-
-    echo $fail;
+// All login
+Route::group(['middleware' => ['auth']], function(){    
+    Route::get('profile',App\Http\Livewire\Profile::class)->name('profile');
+    Route::get('back-to-admin',[App\Http\Controllers\IndexController::class,'backtoadmin'])->name('back-to-admin');
+    Route::get('setting',App\Http\Livewire\Setting::class)->name('setting');
+    Route::get('users/insert',App\Http\Livewire\User\Insert::class)->name('users.insert');
+    Route::get('user-access', App\Http\Livewire\UserAccess\Index::class)->name('user-access.index');
+    Route::get('user-access/insert', App\Http\Livewire\UserAccess\Insert::class)->name('user-access.insert');
+    Route::get('users',App\Http\Livewire\User\Index::class)->name('users.index');
+    Route::get('users/edit/{id}',App\Http\Livewire\User\Edit::class)->name('users.edit');
+    Route::post('users/autologin/{id}',[App\Http\Livewire\User\Index::class,'autologin'])->name('users.autologin');
 });
